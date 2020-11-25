@@ -6,6 +6,19 @@ pygame.init()
 g = 1
 
 
+class Coin(pygame.sprite.Sprite):
+
+    def __init__(self, screen, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.screen = screen
+        self.x = x
+        self.y = y
+
+    def draw(self):
+        circle(self.screen, (250, 210, 1), self.x, self.y, 12)
+        circle(self.screen, (255, 215, 0), self.x, self.y, 10)
+
+
 class Hero(pygame.sprite.Sprite):
 
     def __init__(self, screen, x, y, dx=0, dy=0):
@@ -63,21 +76,29 @@ def move(hero, platforms):
     for platform in platforms:
         if pygame.sprite.collide_rect(hero, platform):
             k = True
-            hero.dy = 0
             hero.y = platform.y - 115
     if hero.y + 100 > 700:
         hero.y = 600
         k = True
+    if k:
+        if hero.dy < 0:
+            hero.y += hero.dy
+            hero.dy += g
+        else:
+            hero.dy = 0
     if not k and hero.y < 600:
         hero.y += hero.dy
         hero.dy += g
     if hero.x < 0 or hero.x + 79 > 1000:
         if hero.x < 0:
             hero.x = 0
+            hero.dx = 0
         if hero.x + 79 > 1000:
             hero.x = 1000 - 79
+            hero.dx = 0
     else:
         hero.x += hero.dx
+    return k
 
 
 FPS = 20
@@ -102,6 +123,12 @@ while not finished:
     image.set_alpha(200)
     screen.blit(image, (0, 100))
 
+    pl = Platform(screen, 0, 250, 500)
+    platforms.append(pl)
+    k = move(hero, platforms)
+    pl.draw()
+    hero.draw()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
@@ -112,17 +139,18 @@ while not finished:
             if event.key == pygame.K_RIGHT:
                 hero.dx = 4
                 hero.m = 1
+            if event.key == pygame.K_UP and k:
+                hero.dy = -10
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 hero.dx = 0
             if event.key == pygame.K_RIGHT:
                 hero.dx = 0
 
-    pl = Platform(screen, 0, 250, 500)
-    platforms.append(pl)
-    move(hero, platforms)
-    pl.draw()
-    hero.draw()
+
+    f = pygame.font.Font(None, 36)
+    text = f.render('Your game time (sec):' + str(timer/20), 1, (180, 0, 0))
+    screen.blit(text, (400, 30))
 
     timer += 1
 
