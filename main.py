@@ -71,22 +71,26 @@ class Platform(pygame.sprite.Sprite):
         polygon(self.screen, (80, 180, 89), points)
 
 
-def move(hero, platforms):
-    k = False
+def move(hero, platforms,k):
+    m = False
     for platform in platforms:
-        if pygame.sprite.collide_rect(hero, platform):
-            k = True
+        if platform.x <= hero.x <= platform.x + platform.l and hero.y + hero.dy + 100 >= platform.y - 15 and hero.y + 100 <= platform.y - 15:
+            m = True
             hero.y = platform.y - 115
-    if hero.y + 100 > 700:
+    if hero.y + hero.dy + 100 >= 700 and hero.y + 100 <= 700:
         hero.y = 600
+        m = True
+    if m:
         k = True
+    else:
+        k = False
     if k:
         if hero.dy < 0:
             hero.y += hero.dy
             hero.dy += g
         else:
             hero.dy = 0
-    if not k and hero.y < 600:
+    if not k and hero.y <= 600:
         hero.y += hero.dy
         hero.dy += g
     if hero.x < 0 or hero.x + 79 > 1000:
@@ -97,7 +101,8 @@ def move(hero, platforms):
             hero.x = 1000 - 79
             hero.dx = 0
     else:
-        hero.x += hero.dx
+        if k:
+            hero.x += hero.dx
     return k
 
 
@@ -109,10 +114,11 @@ clock = pygame.time.Clock()
 finished = False
 platforms = []
 timer = 0
+k = False
 
 hero = Hero(screen, 0, 35)
-hero.images.append(pygame.transform.scale(pygame.image.load('hero1.png'), (79, 100)))
-hero.images.append(pygame.transform.scale(pygame.image.load('hero2.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('1hero.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('3hero.png'), (79, 100)))
 
 while not finished:
     clock.tick(FPS)
@@ -125,7 +131,7 @@ while not finished:
 
     pl = Platform(screen, 0, 250, 500)
     platforms.append(pl)
-    k = move(hero, platforms)
+    k = move(hero, platforms,k)
     pl.draw()
     hero.draw()
 
