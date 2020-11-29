@@ -101,8 +101,7 @@ def move(hero, platforms,k):
             hero.x = 1000 - 79
             hero.dx = 0
     else:
-        if k:
-            hero.x += hero.dx
+        hero.x += hero.dx
     return k
 
 
