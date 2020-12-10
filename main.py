@@ -36,7 +36,7 @@ class Hero(pygame.sprite.Sprite):
 
     def draw(self):
         if hero.dx != 0 and timer % 5 == 0:
-            self.n = timer % len(self.images)
+            self.n = (self.n+1) % len(self.images)
         if self.m == -1:
             image = pygame.transform.flip(self.images[self.n], True, False)
             image.set_colorkey((255, 255, 255))
@@ -117,7 +117,9 @@ k = False
 
 hero = Hero(screen, 0, 35)
 hero.images.append(pygame.transform.scale(pygame.image.load('1hero.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('2hero.png'), (79, 100)))
 hero.images.append(pygame.transform.scale(pygame.image.load('3hero.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('4hero.png'), (79, 100)))
 
 while not finished:
     clock.tick(FPS)
@@ -154,7 +156,7 @@ while not finished:
 
 
     f = pygame.font.Font(None, 36)
-    text = f.render('Your game time (sec):' + str(timer/20), 1, (180, 0, 0))
+    text = f.render('Your game time (sec):' + str(round(timer/20, 1)), 1, (180, 0, 0))
     screen.blit(text, (400, 30))
 
     timer += 1
