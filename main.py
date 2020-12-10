@@ -386,8 +386,12 @@ while not finished:
         else:
             screen.fill((0, 0, 0))
             f = pygame.font.Font(None, 36)
-            text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
+            text = f.render('Game over!', 1, (180, 0, 0))
             screen.blit(text, (400, 30))
+            text = f.render('Your score:' + str(hero.score), 1, (180, 0, 0))
+            screen.blit(text, (400, 50))
+            text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
+            screen.blit(text, (400, 70))
 
     pygame.display.update()
 
