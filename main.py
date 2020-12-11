@@ -308,10 +308,10 @@ play = Button(screen, 480, 250, (219, 195, 219), 'Play!')  # кнопка нач
 buttons.append(play)
 
 hero = Hero(screen, 0, 35)  # инициализация игрока
-hero.images.append(pygame.transform.scale(pygame.image.load('1hero.png'), (79, 100)))
-hero.images.append(pygame.transform.scale(pygame.image.load('2hero.png'), (79, 100)))
-hero.images.append(pygame.transform.scale(pygame.image.load('3hero.png'), (79, 100)))
-hero.images.append(pygame.transform.scale(pygame.image.load('4hero.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('1hero1.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('2hero1.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('3hero1.png'), (79, 100)))
+hero.images.append(pygame.transform.scale(pygame.image.load('4hero1.png'), (79, 100)))
 
 test_gun = Guns(screen, hero, 0)  # инициализация ружья
 
