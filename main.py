@@ -148,14 +148,14 @@ class Hero(pygame.sprite.Sprite):
         self.screen = screen
         self.m = 1
         self.n = 0
-        self.rect = pygame.Rect(self.x, self.y, 79, 100)
+        self.rect = pygame.Rect(self.x, self.y, 80, 100)
         self.time = 0
         self.images = []
         self.health = 100
         self.score = 0
 
     def draw(self):
-        if hero.dx != 0 and timer % 5 == 0:
+        if self.dx != 0 and timer % 5 == 0:
             self.n = (self.n + 1) % len(self.images)
         if self.m == -1:
             image = pygame.transform.flip(self.images[self.n], True, False)
@@ -164,7 +164,7 @@ class Hero(pygame.sprite.Sprite):
         else:
             self.images[self.n].set_colorkey((255, 255, 255))
             screen.blit(self.images[self.n], (self.x, self.y))
-        self.rect = pygame.Rect(self.x, self.y, 79, 100)
+        self.rect = pygame.Rect(self.x, self.y, 80, 100)
         self.time += 1
 
 
@@ -189,8 +189,37 @@ class Button:
         if self.x <= x_m <= self.x + self.w_x + 10 and self.y <= y_m <= self.y + self.w_y + 10:
             self.click = True
 
+
+
+class Image_button:
+    def __init__(self, screen, x, y, image, name):
+        self.screen = screen
+        self.x = x
+        self.y = y
+        self.name = name
+        f = pygame.font.Font(None, 36)
+        self.w_x, self.w_y = f.size(self.name)
+        self.image = image
+        self.click = False
+
+    def draw(self):
+        self.image[0].set_colorkey((255, 255, 255))
+        if self.click:
+            rect(self.screen, (200, 162, 200), (self.x-3, self.y-3, 86, 106))
+        screen.blit(self.image[0], (self.x, self.y))
+        f = pygame.font.Font(None, 36)
+        text = f.render(self.name, 1, (0, 0, 0))
+        self.screen.blit(text, (self.x + 40 - int(self.w_x / 2), self.y + 110))
+
+    def hitting(self, x_m, y_m):
+        if self.x <= x_m <= self.x + 80 and self.y <= y_m <= self.y + 100:
+            if not self.click:
+                self.click = True
+            else:
+                self.click = False
+
     def check(self, x_m, y_m):
-        if self.x <= x_m <= self.x + self.w_x + 10 and self.y <= y_m <= self.y + self.w_y + 10:
+        if self.x <= x_m <= self.x + 80 and self.y <= y_m <= self.y + 100:
             return True
         else:
             return False
@@ -222,7 +251,8 @@ class Platform(pygame.sprite.Sprite):
 def move(hero, platforms, k):
     m = False
     for platform in platforms:
-        if platform.x - 40 <= hero.x <= platform.x + platform.l - 40 and hero.y + hero.dy + 100 >= platform.y - 15 and hero.y + 100 <= platform.y - 15:
+        if (
+                platform.x - 50 <= hero.x <= platform.x + platform.l - 30 or platform.x - 50 <= hero.x + hero.dx <= platform.x + platform.l - 30) and hero.y + hero.dy + 100 >= platform.y - 15 >= hero.y + 100:
             m = True
             hero.y = platform.y - 115
     if hero.y + hero.dy + 100 >= 700 and hero.y + 100 <= 700:
@@ -270,9 +300,25 @@ def generator_pl():
 def zastavka():
     image = pygame.image.load('zastava4.jpg')
     image = pygame.transform.scale(image, (1000, 700))
-    # image.set_alpha(200)
     screen.blit(image, (0, 0))
     play.draw()
+    choose_hero.draw()
+
+
+def dif_heroes():
+    image = pygame.image.load('zastava4.jpg')
+    image = pygame.transform.scale(image, (1000, 700))
+    image.set_alpha(100)
+    screen.blit(image, (0, 0))
+    f = pygame.font.Font(None, 36)
+    text = f.render('Player A', 1, (180, 0, 0))
+    screen.blit(text, (200, 30))
+    text = f.render('Player B', 1, (180, 0, 0))
+    screen.blit(text, (700, 50))
+    for b in image_buttons_b:
+        b.draw()
+    for b in image_buttons_a:
+        b.draw()
 
 
 def transpos(object):  # телепортация через портал объекта
@@ -280,7 +326,8 @@ def transpos(object):  # телепортация через портал объ
         if start_portal.rect.colliderect(object.rect):  # проверка на пересечение границ спрайтов(пересечение грацниц)
             for end_portal in portals:
                 if (start_portal != end_portal) and (
-                        start_portal.link == end_portal.link):  # проверяет то, что разные порталы, но одинаковая связь(цвет)
+                        start_portal.link == end_portal.link):  # проверяет то, что разные порталы, но одинаковая
+                    # связь(цвет)
                     object.y = object.y - object.rect.bottom + end_portal.rect.bottom
                     if end_portal.orientation:
                         object.x = end_portal.x - object.rect[
@@ -300,20 +347,42 @@ finished = False
 timer = 0
 k = False  # индикатор взаимодействия с платформой
 platforms = []  # список платформ
-buttons = []  # список кнопок
 portals = []  # список порталов
 bullets = []  # список пуль
+image_buttons_a = []
+image_buttons_b = []
+images = [[], [], []]
+
+images[0].append(pygame.transform.scale(pygame.image.load('1hero.png'), (80, 100)))
+images[0].append(pygame.transform.scale(pygame.image.load('2hero.png'), (80, 100)))
+images[0].append(pygame.transform.scale(pygame.image.load('3hero.png'), (80, 100)))
+images[0].append(pygame.transform.scale(pygame.image.load('4hero.png'), (80, 100)))
+
+images[1].append(pygame.transform.scale(pygame.image.load('1hero1.png'), (80, 100)))
+images[1].append(pygame.transform.scale(pygame.image.load('2hero1.png'), (80, 100)))
+images[1].append(pygame.transform.scale(pygame.image.load('3hero1.png'), (80, 100)))
+images[1].append(pygame.transform.scale(pygame.image.load('4hero1.png'), (80, 100)))
+
+images[2].append(pygame.transform.scale(pygame.image.load('1hero2.png'), (80, 100)))
+images[2].append(pygame.transform.scale(pygame.image.load('2hero2.png'), (80, 100)))
+images[2].append(pygame.transform.scale(pygame.image.load('3hero2.png'), (80, 100)))
+images[2].append(pygame.transform.scale(pygame.image.load('4hero2.png'), (80, 100)))
 
 play = Button(screen, 480, 250, (219, 195, 219), 'Play!')  # кнопка начала игры
-buttons.append(play)
+choose_hero = Button(screen, 410, 200, (219, 195, 219), 'Choose your hero!')  # кнопка для выбора героя
+image_buttons_a.append(Image_button(screen, 30, 80, images[0], 'Worker'))
+image_buttons_b.append(Image_button(screen, 530, 80, images[0], 'Worker'))
+image_buttons_a.append(Image_button(screen, 130, 80, images[1], 'Elf'))
+image_buttons_b.append(Image_button(screen, 630, 80, images[1], 'Elf'))
+image_buttons_a.append(Image_button(screen, 230, 80, images[2], 'Fairy'))
+image_buttons_b.append(Image_button(screen, 730, 80, images[2], 'Fairy'))
 
-hero = Hero(screen, 0, 35)  # инициализация игрока
-hero.images.append(pygame.transform.scale(pygame.image.load('1hero1.png'), (79, 100)))
-hero.images.append(pygame.transform.scale(pygame.image.load('2hero1.png'), (79, 100)))
-hero.images.append(pygame.transform.scale(pygame.image.load('3hero1.png'), (79, 100)))
-hero.images.append(pygame.transform.scale(pygame.image.load('4hero1.png'), (79, 100)))
+hero_a = Hero(screen, 950, 35)  # инициализация игрока A (справа)
+hero_a.images = images[0]
+hero_b = Hero(screen, 0, 35)  # инициализация игрока В (слева)
+hero_b.images = images[0]
 
-test_gun = Guns(screen, hero, 0)  # инициализация ружья
+test_gun = Guns(screen, hero_a, 0)  # инициализация ружья
 
 generator_pl()  # генерация платформ
 
@@ -324,38 +393,61 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if not play.click:
-                (x_m, y_m) = pygame.mouse.get_pos()
-                play.hitting(x_m, y_m)
-            else:
+            (x_m, y_m) = pygame.mouse.get_pos()
+            if play.click:
                 test_gun.vistrel()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                hero.dx = -5
-                hero.m = (-1)
-            if event.key == pygame.K_RIGHT:
-                hero.dx = 5
-                hero.m = 1
-            if event.key == pygame.K_UP and k:
-                hero.dy = -20
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT:
-                hero.dx = 0
-            if event.key == pygame.K_RIGHT:
-                hero.dx = 0
+            if choose_hero.click:
+                for b in image_buttons_a:
+                    if b.check:
+                        b.hitting(x_m, y_m)
+                        hero_a.images = b.image
+                    else:
+                        b.click = False
+                for b in image_buttons_b:
+                    b.hitting(x_m, y_m)
+                    if b.click:
+                        hero_b.images = b.image
+            else:
+                play.hitting(x_m, y_m)
+                choose_hero.hitting(x_m, y_m)
+        if play.click:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    hero_a.dx = -5
+                    hero_a.m = (-1)
+                if event.key == pygame.K_RIGHT:
+                    hero_a.dx = 5
+                    hero_a.m = 1
+                if event.key == pygame.K_UP and k:
+                    hero_a.dy = -20
+                if event.key == pygame.K_a:
+                    hero_b.dx = -5
+                    hero_b.m = (-1)
+                if event.key == pygame.K_d:
+                    hero_b.dx = 5
+                    hero_b.m = 1
+                if event.key == pygame.K_w and k:
+                    hero_b.dy = -20
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    hero_a.dx = 0
+                if event.key == pygame.K_RIGHT:
+                    hero_a.dx = 0
+                if event.key == pygame.K_a:
+                    hero_b.dx = 0
+                if event.key == pygame.K_d:
+                    hero_b.dx = 0
 
-    if not play.click:
-        zastavka()
-
-    else:
-        if hero.health>0:
+    if play.click:
+        if hero_a.health > 0:
             screen.fill((255, 255, 255))
             image = pygame.image.load('forest1.jpg')
             image = pygame.transform.scale(image, (1000, 600))
             image.set_alpha(200)
             screen.blit(image, (0, 100))
 
-            k = move(hero, platforms, k)  # движение героя
+            k = move(hero_a, platforms, k)  # движение героя A
+            k = move(hero_b, platforms, k)  # движение героя B
 
             for i in portals:  # отрисовка порталов
                 i.draw()
@@ -370,7 +462,8 @@ while not finished:
                     bullets.remove(i)
                 # if i.timer<0: доделать?
 
-            hero.draw()  # отрисовка героя
+            hero_a.draw()  # отрисовка героя
+            hero_b.draw()  # отрисовка героя
 
             test_gun.draw()  # отрисовка ружья
 
@@ -378,7 +471,8 @@ while not finished:
             text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
             screen.blit(text, (400, 30))
 
-            transpos(hero)  # проверка на возможность телепортации героя и телепортация в случае если он зашел в портал
+            transpos(hero_a)  # проверка на возможность телепортации героя и телепортация в случае если он зашел в
+            # портал
             for i in bullets:
                 transpos(i)  # проверка на возможность телепортации всех пуль
 
@@ -388,10 +482,16 @@ while not finished:
             f = pygame.font.Font(None, 36)
             text = f.render('Game over!', 1, (180, 0, 0))
             screen.blit(text, (400, 30))
-            text = f.render('Your score:' + str(hero.score), 1, (180, 0, 0))
+            text = f.render('Your score:' + str(hero_a.score), 1, (180, 0, 0))
             screen.blit(text, (400, 50))
             text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
             screen.blit(text, (400, 70))
+
+    else:
+        if choose_hero.click:
+            dif_heroes()
+        else:
+            zastavka()
 
     pygame.display.update()
 
