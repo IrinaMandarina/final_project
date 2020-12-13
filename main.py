@@ -5,7 +5,7 @@ import random
 
 pygame.init()
 width = 1000  # ширина окна
-heigth = 700  # высота окна
+heigth = 750  # высота окна
 g = 1  # ускорение свободного падения
 
 
@@ -63,28 +63,25 @@ class Portals(pygame.sprite.Sprite):
 
 class Guns(pygame.sprite.Sprite):
     def __init__(self, screen, owner,
-                 gun_type):  # тут под owner имееться в виду тот кто держит пушку нужен для координат если
+                 gun_type, image):  # тут под owner имееться в виду тот кто держит пушку нужен для координат если
         # если будет несколько игроков надо указать игрока если конечно player.x даст координату игрока
         pygame.sprite.Sprite.__init__(self)
         self.screen = screen
         self.owner = owner
         self.gun_type = gun_type
-        self.images = [pygame.transform.scale(pygame.image.load('gun1.png'), (80, 45))]
+        self.image = image
 
     def draw(self):
-        angle = math.atan2(-self.owner.y + pygame.mouse.get_pos()[1], self.owner.x - pygame.mouse.get_pos()[
-            0])  # тут наверное надо будет что-то поменять позиции мышки
-        # всм не знаю как по мультиплееру передаваться будет
-        image = pygame.transform.rotate(self.images[self.gun_type], angle)  # Вале нужно переделать поворот ружья!!!!
-        image = self.images[self.gun_type]
-        image.set_colorkey((255, 255, 255))
-        image = pygame.transform.rotate(image, ((angle / 3.14) * 180) + 180)
-        screen.blit(image, (self.owner.x + 30, self.owner.y + 20))
+        if self.owner.m == -1:
+            self.image.set_colorkey((255, 255, 255))
+            screen.blit(pygame.transform.flip(self.image, True, False), (self.owner.x - 30, self.owner.y + 20))
+        else:
+            self.image.set_colorkey((255, 255, 255))
+            screen.blit(self.image, (self.owner.x + 30, self.owner.y + 20))
 
     def vistrel(self):
-        angle = math.atan2(-self.owner.y + pygame.mouse.get_pos()[1], self.owner.x - pygame.mouse.get_pos()[0])
         bullets.append(
-            Bullets(self.screen, self.owner.x + 60, self.owner.y + 30, -20 * math.cos(angle), 20 * math.sin(angle),
+            Bullets(self.screen, self.owner.x + self.owner.m * 60, self.owner.y + 30, 20 * self.owner.m, 0,
                     self.owner, self.gun_type, 0))
 
 
@@ -211,11 +208,14 @@ class Image_button:
         text = f.render(self.name, 1, (0, 0, 0))
         self.screen.blit(text, (self.x + 40 - int(self.w_x / 2), self.y + 110))
 
-    def hitting(self, x_m, y_m):
+    def hitting(self, x_m, y_m, ch):
         if self.x <= x_m <= self.x + 80 and self.y <= y_m <= self.y + 100:
             if not self.click:
                 self.click = True
             else:
+                self.click = False
+        else:
+            if ch:
                 self.click = False
 
     def check(self, x_m, y_m):
@@ -252,11 +252,11 @@ def move(hero, platforms, k):
     m = False
     for platform in platforms:
         if (
-                platform.x - 50 <= hero.x <= platform.x + platform.l - 30 or platform.x - 50 <= hero.x + hero.dx <= platform.x + platform.l - 30) and hero.y + hero.dy + 100 >= platform.y - 15 >= hero.y + 100:
+                platform.x - 50 <= hero.x <= platform.x + platform.l - 30 or platform.x - 50 <= hero.x + hero.dx <= platform.x + platform.l - 30) and hero.y + hero.dy + 100 >= platform.y - 15 >= hero.y + 100 and hero.dy >= 0:
             m = True
             hero.y = platform.y - 115
-    if hero.y + hero.dy + 100 >= 700 and hero.y + 100 <= 700:
-        hero.y = 600
+    if hero.y + hero.dy + 100 >= heigth >= hero.y + 100 and not m:
+        hero.y = heigth - 100
         hero.health = 0
         m = True
     if m:
@@ -269,15 +269,15 @@ def move(hero, platforms, k):
             hero.dy += g
         else:
             hero.dy = 0
-    if not k and hero.y <= 600:
+    if not k and hero.y <= heigth - 100:
         hero.y += hero.dy
         hero.dy += g
-    if hero.x < 0 or hero.x + 79 > 1000:
+    if hero.x < 0 or hero.x + 80 > width:
         if hero.x < 0:
             hero.x = 0
             hero.dx = 0
-        if hero.x + 79 > 1000:
-            hero.x = 1000 - 79
+        if hero.x + 80 > width:
+            hero.x = width - 80
             hero.dx = 0
     else:
         hero.x += hero.dx
@@ -285,7 +285,7 @@ def move(hero, platforms, k):
 
 
 def generator_pl():
-    level = (300, 500, 685, 100)  # уровни на которых нужно сделать платформы
+    level = (670, 520, 370, 220)  # уровни на которых нужно сделать платформы
     jump_distance = 150  # длинна прыжка
     min_length = 200  # минимальная длина платформы
     max_length = 400  # максимальная длина платформы
@@ -299,7 +299,7 @@ def generator_pl():
 
 def zastavka():
     image = pygame.image.load('zastava4.jpg')
-    image = pygame.transform.scale(image, (1000, 700))
+    image = pygame.transform.scale(image, (width, heigth))
     screen.blit(image, (0, 0))
     play.draw()
     choose_hero.draw()
@@ -307,7 +307,7 @@ def zastavka():
 
 def dif_heroes():
     image = pygame.image.load('zastava4.jpg')
-    image = pygame.transform.scale(image, (1000, 700))
+    image = pygame.transform.scale(image, (width, heigth))
     image.set_alpha(100)
     screen.blit(image, (0, 0))
     f = pygame.font.Font(None, 36)
@@ -319,6 +319,7 @@ def dif_heroes():
         b.draw()
     for b in image_buttons_a:
         b.draw()
+    menu.draw()
 
 
 def transpos(object):  # телепортация через портал объекта
@@ -331,7 +332,7 @@ def transpos(object):  # телепортация через портал объ
                     object.y = object.y - object.rect.bottom + end_portal.rect.bottom
                     if end_portal.orientation:
                         object.x = end_portal.x - object.rect[
-                            2] - 10  # вычитаем 10 чтобы  было время на реагирование после телерортации
+                            2] - 10  # вычитаем 10, чтобы было время на реагирование после телерортации
                     else:
                         object.x = end_portal.x + object.rect[2] + 10  # -||-
                     if (start_portal.orientation != end_portal.orientation) and (type(object) == Bullets):
@@ -345,7 +346,8 @@ pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
 timer = 0
-k = False  # индикатор взаимодействия с платформой
+k_a = False  # индикатор взаимодействия с платформой
+k_b = False
 platforms = []  # список платформ
 portals = []  # список порталов
 bullets = []  # список пуль
@@ -370,6 +372,8 @@ images[2].append(pygame.transform.scale(pygame.image.load('4hero2.png'), (80, 10
 
 play = Button(screen, 480, 250, (219, 195, 219), 'Play!')  # кнопка начала игры
 choose_hero = Button(screen, 410, 200, (219, 195, 219), 'Choose your hero!')  # кнопка для выбора героя
+menu = Button(screen, 920, 10, (219, 195, 219), 'Menu')  # кнопка выхода в меню
+menu.click = True
 image_buttons_a.append(Image_button(screen, 30, 80, images[0], 'Worker'))
 image_buttons_b.append(Image_button(screen, 530, 80, images[0], 'Worker'))
 image_buttons_a.append(Image_button(screen, 130, 80, images[1], 'Elf'))
@@ -377,12 +381,17 @@ image_buttons_b.append(Image_button(screen, 630, 80, images[1], 'Elf'))
 image_buttons_a.append(Image_button(screen, 230, 80, images[2], 'Fairy'))
 image_buttons_b.append(Image_button(screen, 730, 80, images[2], 'Fairy'))
 
-hero_a = Hero(screen, 950, 35)  # инициализация игрока A (справа)
+hero_a = Hero(screen, 0, 35)  # инициализация игрока A (справа)
 hero_a.images = images[0]
-hero_b = Hero(screen, 0, 35)  # инициализация игрока В (слева)
+hero_b = Hero(screen, 950, 35)  # инициализация игрока В (слева)
 hero_b.images = images[0]
 
-test_gun = Guns(screen, hero_a, 0)  # инициализация ружья
+im_gun_1 = pygame.transform.scale(pygame.image.load('gun1.png'), (80, 45))
+im_gun_2 = pygame.transform.scale(pygame.image.load('gun4.png'), (80, 45))
+im_gun_3 = pygame.transform.scale(pygame.image.load('gun3.png'), (80, 45))
+
+gun_a = Guns(screen, hero_a, 0, im_gun_2)  # инициализация ружья
+gun_b = Guns(screen, hero_b, 0, im_gun_1)
 
 generator_pl()  # генерация платформ
 
@@ -395,59 +404,78 @@ while not finished:
         if event.type == pygame.MOUSEBUTTONDOWN:
             (x_m, y_m) = pygame.mouse.get_pos()
             if play.click:
-                test_gun.vistrel()
+                menu.hitting(x_m, y_m)
+                if menu.click:
+                    play.click = False
             if choose_hero.click:
+                a_c = False
+                b_c = False
+                menu.hitting(x_m, y_m)
+                if menu.click:
+                    choose_hero.click = False
                 for b in image_buttons_a:
-                    if b.check:
-                        b.hitting(x_m, y_m)
-                        hero_a.images = b.image
-                    else:
-                        b.click = False
+                    if b.check(x_m, y_m):
+                        a_c = True
                 for b in image_buttons_b:
-                    b.hitting(x_m, y_m)
+                    if b.check(x_m, y_m):
+                        b_c = True
+                for b in image_buttons_a:
+                    b.hitting(x_m, y_m, a_c)
+                    if b.click:
+                        hero_a.images = b.image
+                for b in image_buttons_b:
+                    b.hitting(x_m, y_m, b_c)
                     if b.click:
                         hero_b.images = b.image
             else:
                 play.hitting(x_m, y_m)
+                if play.click:
+                    menu.click = False
                 choose_hero.hitting(x_m, y_m)
+                if choose_hero.click:
+                    menu.click = False
         if play.click:
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    gun_a.vistrel()
+                if event.key == pygame.K_DOWN:
+                    gun_b.vistrel()
                 if event.key == pygame.K_LEFT:
-                    hero_a.dx = -5
-                    hero_a.m = (-1)
-                if event.key == pygame.K_RIGHT:
-                    hero_a.dx = 5
-                    hero_a.m = 1
-                if event.key == pygame.K_UP and k:
-                    hero_a.dy = -20
-                if event.key == pygame.K_a:
                     hero_b.dx = -5
                     hero_b.m = (-1)
-                if event.key == pygame.K_d:
+                if event.key == pygame.K_RIGHT:
                     hero_b.dx = 5
                     hero_b.m = 1
-                if event.key == pygame.K_w and k:
-                    hero_b.dy = -20
+                if event.key == pygame.K_UP and k_b:
+                    hero_b.dy = -17
+                if event.key == pygame.K_a:
+                    hero_a.dx = -5
+                    hero_a.m = (-1)
+                if event.key == pygame.K_d:
+                    hero_a.dx = 5
+                    hero_a.m = 1
+                if event.key == pygame.K_w and k_a:
+                    hero_a.dy = -17
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
-                    hero_a.dx = 0
+                    hero_b.dx = 0
                 if event.key == pygame.K_RIGHT:
-                    hero_a.dx = 0
+                    hero_b.dx = 0
                 if event.key == pygame.K_a:
-                    hero_b.dx = 0
+                    hero_a.dx = 0
                 if event.key == pygame.K_d:
-                    hero_b.dx = 0
+                    hero_a.dx = 0
 
     if play.click:
-        if hero_a.health > 0:
+        if hero_a.health > 0 and hero_b.health > 0:
             screen.fill((255, 255, 255))
             image = pygame.image.load('forest1.jpg')
-            image = pygame.transform.scale(image, (1000, 600))
+            image = pygame.transform.scale(image, (width, heigth))
             image.set_alpha(200)
-            screen.blit(image, (0, 100))
+            screen.blit(image, (0, 0))
 
-            k = move(hero_a, platforms, k)  # движение героя A
-            k = move(hero_b, platforms, k)  # движение героя B
+            k_a = move(hero_a, platforms, k_a)  # движение героя A
+            k_b = move(hero_b, platforms, k_b)  # движение героя B
 
             for i in portals:  # отрисовка порталов
                 i.draw()
@@ -463,9 +491,10 @@ while not finished:
                 # if i.timer<0: доделать?
 
             hero_a.draw()  # отрисовка героя
-            hero_b.draw()  # отрисовка героя
+            hero_b.draw()
 
-            test_gun.draw()  # отрисовка ружья
+            gun_a.draw()  # отрисовка ружья
+            gun_b.draw()
 
             f = pygame.font.Font(None, 36)
             text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
@@ -477,20 +506,26 @@ while not finished:
                 transpos(i)  # проверка на возможность телепортации всех пуль
 
             timer += 1
+
+            menu.draw()
         else:
             screen.fill((0, 0, 0))
             f = pygame.font.Font(None, 36)
             text = f.render('Game over!', 1, (180, 0, 0))
-            screen.blit(text, (400, 30))
-            text = f.render('Your score:' + str(hero_a.score), 1, (180, 0, 0))
-            screen.blit(text, (400, 50))
+            screen.blit(text, (400, 100))
+            text = f.render('Player A score:' + str(hero_a.score), 1, (180, 0, 0))
+            screen.blit(text, (250, 130))
+            text = f.render('Player B score:' + str(hero_a.score), 1, (180, 0, 0))
+            screen.blit(text, (550, 130))
             text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
-            screen.blit(text, (400, 70))
+            screen.blit(text, (350, 160))
 
     else:
         if choose_hero.click:
+            menu.click = False
             dif_heroes()
-        else:
+        if menu.click:
+            play.click = False
             zastavka()
 
     pygame.display.update()
