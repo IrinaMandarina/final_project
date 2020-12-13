@@ -73,8 +73,9 @@ class Guns(pygame.sprite.Sprite):
 
     def draw(self):
         if self.owner.m == -1:
-            self.image.set_colorkey((255, 255, 255))
-            screen.blit(pygame.transform.flip(self.image, True, False), (self.owner.x - 30, self.owner.y + 20))
+            surf = pygame.transform.flip(self.image, True, False)
+            surf.set_colorkey((255, 255, 255))
+            screen.blit(surf, (self.owner.x - 30, self.owner.y + 20))
         else:
             self.image.set_colorkey((255, 255, 255))
             screen.blit(self.image, (self.owner.x + 30, self.owner.y + 20))
@@ -187,7 +188,6 @@ class Button:
             self.click = True
 
 
-
 class Image_button:
     def __init__(self, screen, x, y, image, name):
         self.screen = screen
@@ -202,7 +202,7 @@ class Image_button:
     def draw(self):
         self.image[0].set_colorkey((255, 255, 255))
         if self.click:
-            rect(self.screen, (200, 162, 200), (self.x-3, self.y-3, 86, 106))
+            rect(self.screen, (200, 162, 200), (self.x - 3, self.y - 3, 86, 106))
         screen.blit(self.image[0], (self.x, self.y))
         f = pygame.font.Font(None, 36)
         text = f.render(self.name, 1, (0, 0, 0))
@@ -373,6 +373,7 @@ images[2].append(pygame.transform.scale(pygame.image.load('4hero2.png'), (80, 10
 play = Button(screen, 480, 250, (219, 195, 219), 'Play!')  # кнопка начала игры
 choose_hero = Button(screen, 410, 200, (219, 195, 219), 'Choose your hero!')  # кнопка для выбора героя
 menu = Button(screen, 920, 10, (219, 195, 219), 'Menu')  # кнопка выхода в меню
+restart = Button(screen, 800, 10, (219, 195, 219), 'Restart')  # кнопка выхода в меню
 menu.click = True
 image_buttons_a.append(Image_button(screen, 30, 80, images[0], 'Worker'))
 image_buttons_b.append(Image_button(screen, 530, 80, images[0], 'Worker'))
@@ -404,6 +405,7 @@ while not finished:
         if event.type == pygame.MOUSEBUTTONDOWN:
             (x_m, y_m) = pygame.mouse.get_pos()
             if play.click:
+                restart.hitting(x_m, y_m)
                 menu.hitting(x_m, y_m)
                 if menu.click:
                     play.click = False
@@ -467,6 +469,19 @@ while not finished:
                     hero_a.dx = 0
 
     if play.click:
+        if restart.click:
+            timer = 0
+            hero_a.score = 0
+            hero_b.score = 0
+            hero_a.health = 100
+            hero_b.health = 100
+            hero_a.x = 0
+            hero_b.y = 35
+            hero_b.x = 950
+            hero_a.y = 35
+            platforms = []
+            generator_pl()
+            restart.click = False
         if hero_a.health > 0 and hero_b.health > 0:
             screen.fill((255, 255, 255))
             image = pygame.image.load('forest1.jpg')
@@ -508,6 +523,7 @@ while not finished:
             timer += 1
 
             menu.draw()
+            restart.draw()
         else:
             screen.fill((0, 0, 0))
             f = pygame.font.Font(None, 36)
@@ -519,6 +535,7 @@ while not finished:
             screen.blit(text, (550, 130))
             text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
             screen.blit(text, (350, 160))
+            restart.draw()
 
     else:
         if choose_hero.click:
