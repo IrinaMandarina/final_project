@@ -3,6 +3,7 @@ from pygame.draw import *
 import math
 import random
 
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 width = 1000  # ширина окна
 heigth = 750  # высота окна
@@ -34,7 +35,8 @@ class Portals(pygame.sprite.Sprite):
                 pygame.transform.scale(pygame.image.load('yellowportal4.png'), (79, 100))
             ]]
         self.orientation = orientation  # определяет оринтацию портала вправо или влево True-влево,False-вправо
-        self.link = link  # определяет "частоту портала" порталы с одинаковой частотой телепортируют друг к другу частоты. 0 1 2 соответсвенно синий красный желтый порталы
+        self.link = link  # определяет "частоту портала" порталы с одинаковой частотой телепортируют друг к другу
+        # частоты. 0 1 2 соответсвенно синий красный желтый порталы
         self.rect = self.images[self.link][0].get_rect()
         self.rect.center = (self.x + 40, self.y + 50)  # просто rect
 
@@ -81,6 +83,7 @@ class Guns(pygame.sprite.Sprite):
             screen.blit(self.image, (self.owner.x + 30, self.owner.y + 20))
 
     def vistrel(self):
+        vistrel.play()
         bullets.append(
             Bullets(self.screen, self.owner.x + self.owner.m * 60, self.owner.y + 30, 20 * self.owner.m, 0,
                     self.owner, self.gun_type, 0))
@@ -180,12 +183,13 @@ class Button:
     def draw(self):
         rect(self.screen, self.color, (self.x, self.y, self.w_x + 10, self.w_y + 10))
         f = pygame.font.Font(None, 36)
-        text = f.render(self.name, 1, (92, 73, 120))
+        text = f.render(self.name, True, (92, 73, 120))
         self.screen.blit(text, (self.x + 5, self.y + 5))
 
     def hitting(self, x_m, y_m):
         if self.x <= x_m <= self.x + self.w_x + 10 and self.y <= y_m <= self.y + self.w_y + 10:
             self.click = True
+            click.play()
 
 
 class Image_button:
@@ -205,11 +209,12 @@ class Image_button:
             rect(self.screen, (200, 162, 200), (self.x - 3, self.y - 3, 86, 106))
         screen.blit(self.image[0], (self.x, self.y))
         f = pygame.font.Font(None, 36)
-        text = f.render(self.name, 1, (0, 0, 0))
+        text = f.render(self.name, True, (0, 0, 0))
         self.screen.blit(text, (self.x + 40 - int(self.w_x / 2), self.y + 110))
 
     def hitting(self, x_m, y_m, ch):
         if self.x <= x_m <= self.x + 80 and self.y <= y_m <= self.y + 100:
+            click.play()
             if not self.click:
                 self.click = True
             else:
@@ -252,7 +257,9 @@ def move(hero, platforms, k):
     m = False
     for platform in platforms:
         if (
-                platform.x - 50 <= hero.x <= platform.x + platform.l - 30 or platform.x - 50 <= hero.x + hero.dx <= platform.x + platform.l - 30) and hero.y + hero.dy + 100 >= platform.y - 15 >= hero.y + 100 and hero.dy >= 0:
+                platform.x - 50 <= hero.x <= platform.x + platform.l - 30 or platform.x - 50 <= hero.x + hero.dx <=
+                platform.x + platform.l - 30) and \
+                hero.y + hero.dy + 100 >= platform.y - 15 >= hero.y + 100 and hero.dy >= 0:
             m = True
             hero.y = platform.y - 115
     if hero.y + hero.dy + 100 >= heigth >= hero.y + 100 and not m:
@@ -297,12 +304,20 @@ def generator_pl():
             x_nachala += (length + jump_distance)
 
 
-def zastavka():
+def zastavka(music):
+    if not music:
+        pygame.mixer.stop()
+        pygame.mixer.music.load('zastavka.mp3')
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.3)
+        click.play()
+        music = True
     image = pygame.image.load('zastava4.jpg')
     image = pygame.transform.scale(image, (width, heigth))
     screen.blit(image, (0, 0))
     play.draw()
     choose_hero.draw()
+    return music
 
 
 def dif_heroes():
@@ -311,9 +326,9 @@ def dif_heroes():
     image.set_alpha(100)
     screen.blit(image, (0, 0))
     f = pygame.font.Font(None, 36)
-    text = f.render('Player A', 1, (180, 0, 0))
+    text = f.render('Player A', True, (180, 0, 0))
     screen.blit(text, (200, 30))
-    text = f.render('Player B', 1, (180, 0, 0))
+    text = f.render('Player B', True, (180, 0, 0))
     screen.blit(text, (700, 50))
     for b in image_buttons_b:
         b.draw()
@@ -346,6 +361,7 @@ pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
 timer = 0
+music = False
 k_a = False  # индикатор взаимодействия с платформой
 k_b = False
 platforms = []  # список платформ
@@ -391,6 +407,10 @@ im_gun_1 = pygame.transform.scale(pygame.image.load('gun1.png'), (80, 45))
 im_gun_2 = pygame.transform.scale(pygame.image.load('gun4.png'), (80, 45))
 im_gun_3 = pygame.transform.scale(pygame.image.load('gun3.png'), (80, 45))
 
+vistrel = pygame.mixer.Sound('vistrel.wav')
+game_over = pygame.mixer.Sound('game_over_kr.wav')
+click = pygame.mixer.Sound('click.wav')
+
 gun_a = Guns(screen, hero_a, 0, im_gun_2)  # инициализация ружья
 gun_b = Guns(screen, hero_b, 0, im_gun_1)
 
@@ -408,6 +428,7 @@ while not finished:
                 restart.hitting(x_m, y_m)
                 menu.hitting(x_m, y_m)
                 if menu.click:
+                    music = False
                     play.click = False
             if choose_hero.click:
                 a_c = False
@@ -432,6 +453,8 @@ while not finished:
             else:
                 play.hitting(x_m, y_m)
                 if play.click:
+                    if menu.click:
+                        music = False
                     menu.click = False
                 choose_hero.hitting(x_m, y_m)
                 if choose_hero.click:
@@ -482,7 +505,15 @@ while not finished:
             platforms = []
             generator_pl()
             restart.click = False
+            music = False
         if hero_a.health > 0 and hero_b.health > 0:
+            if not music:
+                pygame.mixer.stop()
+                pygame.mixer.music.load('play.mp3')
+                pygame.mixer.music.play(-1)
+                pygame.mixer.music.set_volume(0.3)
+                click.play()
+                music = True
             screen.fill((255, 255, 255))
             image = pygame.image.load('forest1.jpg')
             image = pygame.transform.scale(image, (width, heigth))
@@ -500,22 +531,35 @@ while not finished:
 
             for i in bullets:  # движение и отрисовка пуль
                 i.draw()
+                if pygame.sprite.collide_rect(i, hero_a) and i.owner == hero_b:
+                    bullets.remove(i)
+                    hero_a.health -= 1
+                if pygame.sprite.collide_rect(i, hero_b) and i.owner == hero_a:
+                    bullets.remove(i)
+                    hero_b.health -= 1
                 k = i.move(platforms, i)  # исчезновение пули при взаимодействии с платформой
                 if k:
                     bullets.remove(i)
                 # if i.timer<0: доделать?
 
             hero_a.draw()  # отрисовка героя
-            hero_b.draw()
-
             gun_a.draw()  # отрисовка ружья
+
+            hero_b.draw()
             gun_b.draw()
 
             f = pygame.font.Font(None, 36)
-            text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
-            screen.blit(text, (400, 30))
+            text = f.render('Hp A   ' + str(hero_a.health), True, (180, 0, 0))
+            #  text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
+            screen.blit(text, (20, 20))
+            text = f.render('Hp B   ' + str(hero_b.health), True, (180, 0, 0))
+            screen.blit(text, (20, 45))
+            text = f.render('Score A   ' + str(hero_a.score), True, (0, 0, 0))
+            screen.blit(text, (170, 20))
+            text = f.render('Score B   ' + str(hero_b.score), True, (0, 0, 0))
+            screen.blit(text, (170, 45))
 
-            transpos(hero_a)  # проверка на возможность телепортации героя и телепортация в случае если он зашел в
+            transpos(hero_a)  # проверка на возможность телепортации героя и телепортация в случае, если он зашел в
             # портал
             for i in bullets:
                 transpos(i)  # проверка на возможность телепортации всех пуль
@@ -525,15 +569,22 @@ while not finished:
             menu.draw()
             restart.draw()
         else:
+            if music:
+                pygame.mixer.stop()
+                pygame.mixer.music.load('konets.mp3')
+                pygame.mixer.music.play(-1)
+                pygame.mixer.music.set_volume(0.4)
+                game_over.play()
+                music = False
             screen.fill((0, 0, 0))
             f = pygame.font.Font(None, 36)
-            text = f.render('Game over!', 1, (180, 0, 0))
+            text = f.render('Game over!', True, (180, 0, 0))
             screen.blit(text, (400, 100))
-            text = f.render('Player A score:' + str(hero_a.score), 1, (180, 0, 0))
+            text = f.render('Player A score:' + str(hero_a.score), True, (180, 0, 0))
             screen.blit(text, (250, 130))
-            text = f.render('Player B score:' + str(hero_a.score), 1, (180, 0, 0))
+            text = f.render('Player B score:' + str(hero_a.score), True, (180, 0, 0))
             screen.blit(text, (550, 130))
-            text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
+            text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), True, (180, 0, 0))
             screen.blit(text, (350, 160))
             restart.draw()
 
@@ -543,7 +594,7 @@ while not finished:
             dif_heroes()
         if menu.click:
             play.click = False
-            zastavka()
+            music = zastavka(music)
 
     pygame.display.update()
 
