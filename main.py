@@ -317,6 +317,7 @@ def zastavka(music):
     screen.blit(image, (0, 0))
     play.draw()
     choose_hero.draw()
+    rules.draw()
     return music
 
 
@@ -352,6 +353,43 @@ def transpos(object):  # телепортация через портал объ
                         object.x = end_portal.x + object.rect[2] + 10  # -||-
                     if (start_portal.orientation != end_portal.orientation) and (type(object) == Bullets):
                         object.vx = int((-1) * object.vx)
+
+
+def rules_t():
+    image = pygame.image.load('zastava4.jpg')
+    image = pygame.transform.scale(image, (width, heigth))
+    image.set_alpha(100)
+    screen.blit(image, (0, 0))
+    f = pygame.font.Font(None, 36)
+    text = f.render('Правила игры:', True, (180, 0, 0))
+    screen.blit(text, (450, 20))
+    text = f.render('Цель игры – уничтожить соперника и собрать побольше монет!', True, (0, 0, 0))
+    screen.blit(text, (150, 55))
+    f = pygame.font.Font(None, 24)
+    text = f.render('Для управления игроком А используйте кнопки:', True, (0, 0, 0))
+    screen.blit(text, (50, 100))
+    text = f.render('Для управления игроком B используйте кнопки:', True, (0, 0, 0))
+    screen.blit(text, (550, 100))
+    text = f.render('A - движение налево', True, (0, 0, 0))
+    screen.blit(text, (50, 115))
+    text = f.render('D - движение направо', True, (0, 0, 0))
+    screen.blit(text, (50, 130))
+    text = f.render('W - прыжок', True, (0, 0, 0))
+    screen.blit(text, (50, 145))
+    text = f.render('S - выстрел', True, (0, 0, 0))
+    screen.blit(text, (50, 160))
+    text = f.render('<- - движение налево', True, (0, 0, 0))
+    screen.blit(text, (550, 115))
+    text = f.render('-> - движение направо', True, (0, 0, 0))
+    screen.blit(text, (550, 130))
+    text = f.render('PgUp - прыжок', True, (0, 0, 0))
+    screen.blit(text, (550, 145))
+    text = f.render('PgDn - выстрел', True, (0, 0, 0))
+    screen.blit(text, (550, 160))
+    f = pygame.font.Font(None, 36)
+    text = f.render('При падении с платформы игрок умирает...', True, (0, 0, 0))
+    screen.blit(text, (150, 190))
+    menu.draw()
 
 
 FPS = 30
@@ -390,6 +428,7 @@ play = Button(screen, 480, 250, (219, 195, 219), 'Play!')  # кнопка нач
 choose_hero = Button(screen, 410, 200, (219, 195, 219), 'Choose your hero!')  # кнопка для выбора героя
 menu = Button(screen, 920, 10, (219, 195, 219), 'Menu')  # кнопка выхода в меню
 restart = Button(screen, 800, 10, (219, 195, 219), 'Restart')  # кнопка выхода в меню
+rules = Button(screen, 475, 300, (219, 195, 219), 'Rules')  # кнопка правил
 menu.click = True
 image_buttons_a.append(Image_button(screen, 30, 80, images[0], 'Worker'))
 image_buttons_b.append(Image_button(screen, 530, 80, images[0], 'Worker'))
@@ -430,7 +469,7 @@ while not finished:
                 if menu.click:
                     music = False
                     play.click = False
-            if choose_hero.click:
+            elif choose_hero.click:
                 a_c = False
                 b_c = False
                 menu.hitting(x_m, y_m)
@@ -450,11 +489,17 @@ while not finished:
                     b.hitting(x_m, y_m, b_c)
                     if b.click:
                         hero_b.images = b.image
+            elif rules.click:
+                menu.hitting(x_m, y_m)
+                if menu.click:
+                    rules.click = False
             else:
+                rules.hitting(x_m, y_m)
+                if rules.click:
+                    menu.click = False
                 play.hitting(x_m, y_m)
                 if play.click:
-                    if menu.click:
-                        music = False
+                    music = False
                     menu.click = False
                 choose_hero.hitting(x_m, y_m)
                 if choose_hero.click:
@@ -589,11 +634,15 @@ while not finished:
             restart.draw()
 
     else:
+        if rules.click:
+            menu.click = False
+            rules_t()
         if choose_hero.click:
             menu.click = False
             dif_heroes()
         if menu.click:
             play.click = False
+            rules.click = False
             music = zastavka(music)
 
     pygame.display.update()
