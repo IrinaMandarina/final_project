@@ -287,6 +287,7 @@ portals_module.generator_pr(platforms,portals,screen,width)
 
 game_over = pygame.mixer.Sound('game_over_kr.wav')
 click = pygame.mixer.Sound('click.wav')
+coin = pygame.mixer.Sound('coin.wav')
 
 gun_a = module_gun_and_bullets.Guns(screen, hero_a, 0, im_gun_2)  # инициализация ружья
 gun_b = module_gun_and_bullets.Guns(screen, hero_b, 0, im_gun_1)
@@ -440,8 +441,8 @@ while not finished:
             if medkit.time_to_delete<0:
                 medkit=heal_module.Medkit(screen,platforms,width)
 
-            timer_monetok =coins_module.generator_cn(screen,platforms,coins,timer_monetok) - 1
-            coins_module.drawing_and_removing_coins(coins,[hero_a,hero_b])  # это больше чем просто отрисовка !!  не надо писать как метод!!
+            timer_monetok =coins_module.generator_cn(screen,platforms,coins,timer_monetok, coin) - 1
+            coins_module.drawing_and_removing_coins(coins,[hero_a,hero_b], coin)  # это больше чем просто отрисовка !!  не надо писать как метод!!
             f = pygame.font.Font(None, 36)
             text = f.render('Hp A   ' + str(hero_a.health), True, (180, 0, 0))
             #  text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
