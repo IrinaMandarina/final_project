@@ -4,65 +4,13 @@ import random
 import coins_module
 import platforms_module
 import module_gun_and_bullets
-
+import portals_module
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 width = 1000  # ширина окна
 heigth = 750  # высота окна
 g = 1  # ускорение свободного падения
 
-
-class Portals(pygame.sprite.Sprite):
-    def __init__(self, screen, x, y, orientation, link):
-        pygame.sprite.Sprite.__init__(self)
-        self.screen = screen
-        self.x = x
-        self.y = y
-        self.timer_image_portal = 0
-        self.timer_image_portal_temp = random.randint(0, 11)
-        self.images = [[
-            pygame.transform.scale(pygame.image.load('blueportal1.png'), (79, 100)),
-            pygame.transform.scale(pygame.image.load('blueportal2.png'), (79, 100)),
-            pygame.transform.scale(pygame.image.load('blueportal3.png'), (79, 100)),
-            pygame.transform.scale(pygame.image.load('blueportal4.png'), (79, 100))],
-            [
-                pygame.transform.scale(pygame.image.load('redportal1.png'), (79, 100)),
-                pygame.transform.scale(pygame.image.load('redportal2.png'), (79, 100)),
-                pygame.transform.scale(pygame.image.load('redportal3.png'), (79, 100)),
-                pygame.transform.scale(pygame.image.load('redportal4.png'), (79, 100))],
-            [
-                pygame.transform.scale(pygame.image.load('yellowprotal1.png'), (79, 100)),
-                pygame.transform.scale(pygame.image.load('yellowportal2.png'), (79, 100)),
-                pygame.transform.scale(pygame.image.load('yellowportal3.png'), (79, 100)),
-                pygame.transform.scale(pygame.image.load('yellowportal4.png'), (79, 100))
-            ]]
-        self.orientation = orientation  # определяет оринтацию портала вправо или влево True-влево,False-вправо
-        self.link = link  # определяет "частоту портала" порталы с одинаковой частотой телепортируют друг к другу
-        # частоты. 0 1 2 соответсвенно синий красный желтый порталы
-        self.rect = self.images[self.link][0].get_rect()
-        self.rect.center = (self.x + 40, self.y + 50)  # просто rect
-
-    def draw(self):  # отрисовка портала
-        if self.orientation:
-            self.images[self.link][self.timer_image_portal].set_colorkey((255, 255, 255))
-            screen.blit(self.images[self.link][self.timer_image_portal], (self.x, self.y))
-        else:
-            image = pygame.transform.flip(self.images[self.link][self.timer_image_portal], True, False)
-            image.set_colorkey((255, 255, 255))
-            screen.blit(image, (self.x, self.y))
-        self.timer_image_portal_temp += 1
-        if self.timer_image_portal_temp > 3:
-            self.timer_image_portal = 1
-
-        if self.timer_image_portal_temp > 6:
-            self.timer_image_portal = 2
-
-        if self.timer_image_portal_temp > 9:
-            self.timer_image_portal = 3
-
-        if self.timer_image_portal_temp > 12:
-            self.timer_image_portal = 0
-            self.timer_image_portal_temp = 0
 
 
 class Hero(pygame.sprite.Sprite):
@@ -233,22 +181,6 @@ def dif_heroes():
     menu.draw()
 
 
-def transpos(object):  # телепортация через портал объекта
-    for start_portal in portals:
-        if start_portal.rect.colliderect(object.rect):  # проверка на пересечение границ спрайтов(пересечение грацниц)
-            for end_portal in portals:
-                if (start_portal != end_portal) and (
-                        start_portal.link == end_portal.link):  # проверяет то, что разные порталы, но одинаковая
-                    # связь(цвет)
-                    object.y = object.y - object.rect.bottom + end_portal.rect.bottom
-                    if end_portal.orientation:
-                        object.x = end_portal.x - object.rect[
-                            2] - 10  # вычитаем 10, чтобы было время на реагирование после телерортации
-                    else:
-                        object.x = end_portal.x + object.rect[2] + 10  # -||-
-                    if (start_portal.orientation != end_portal.orientation) and (type(object) == module_gun_and_bullets.Bullets):
-                        object.vx = int((-1) * object.vx)
-
 
 def rules_t():
     image = pygame.image.load('zastava4.jpg')
@@ -350,6 +282,7 @@ hero_b.images = images[0]
 im_gun_1 = pygame.transform.scale(pygame.image.load('gun1.png'), (80, 45))
 im_gun_2 = pygame.transform.scale(pygame.image.load('gun4.png'), (80, 45))
 im_gun_3 = pygame.transform.scale(pygame.image.load('gun3.png'), (80, 45))
+portals_module.generator_pr(platforms,portals,screen)
 
 game_over = pygame.mixer.Sound('game_over_kr.wav')
 click = pygame.mixer.Sound('click.wav')
@@ -511,11 +444,12 @@ while not finished:
             screen.blit(text, (170, 20))
             text = f.render('Score B   ' + str(hero_b.score), True, (0, 0, 0))
             screen.blit(text, (170, 45))
-
-            transpos(hero_a)  # проверка на возможность телепортации героя и телепортация в случае, если он зашел в
+            portals_module.transpos(hero_a,portals)
+            portals_module.transpos(hero_b,portals)
+            # проверка на возможность телепортации героя и телепортация в случае, если он зашел в
             # портал
             for i in bullets:
-                transpos(i)  # проверка на возможность телепортации всех пуль
+                portals_module.transpos(i,portals)  # проверка на возможность телепортации всех пуль
 
             timer += 1
 

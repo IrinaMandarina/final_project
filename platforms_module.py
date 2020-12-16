@@ -11,6 +11,7 @@ class Platform(pygame.sprite.Sprite):
         self.screen = screen
         self.rect = pygame.Rect(self.x, self.y - 15, self.l, 30)
         self.have_a_coin = False
+        self.have_a_portal = False
 
     def draw(self):
         rect(self.screen, (194, 120, 16), (self.x, self.y - 15, self.l, 30), border_bottom_left_radius=14,
