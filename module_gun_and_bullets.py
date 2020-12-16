@@ -1,9 +1,5 @@
 import pygame
-from pygame.draw import *
 import math
-import random
-import coins_module
-import platforms_module
 class Guns(pygame.sprite.Sprite):
     def __init__(self, screen, owner,
                  gun_type, image):  # тут под owner имееться в виду тот кто держит пушку нужен для координат если

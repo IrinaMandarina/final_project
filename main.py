@@ -5,6 +5,7 @@ import coins_module
 import platforms_module
 import module_gun_and_bullets
 import portals_module
+import heal_module
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 width = 1000  # ширина окна
@@ -290,7 +291,7 @@ click = pygame.mixer.Sound('click.wav')
 gun_a = module_gun_and_bullets.Guns(screen, hero_a, 0, im_gun_2)  # инициализация ружья
 gun_b = module_gun_and_bullets.Guns(screen, hero_b, 0, im_gun_1)
 
-
+medkit=heal_module.Medkit(screen,platforms,width)
 
 while not finished:
     clock.tick(FPS)
@@ -376,6 +377,7 @@ while not finished:
     if play.click:
         if restart.click:
             timer = 0
+            medkit=heal_module.Medkit(screen,platforms,width)
             coins=[]
             platforms = []
             bullets = []
@@ -430,9 +432,13 @@ while not finished:
 
             hero_a.draw()  # отрисовка героя
             gun_a.draw()  # отрисовка ружья
-
+            medkit.draw()
             hero_b.draw()
             gun_b.draw()
+            medkit.waiting(hero_a)
+            medkit.waiting(hero_b)
+            if medkit.time_to_delete<0:
+                medkit=heal_module.Medkit(screen,platforms,width)
 
             timer_monetok =coins_module.generator_cn(screen,platforms,coins,timer_monetok) - 1
             coins_module.drawing_and_removing_coins(coins,[hero_a,hero_b])  # это больше чем просто отрисовка !!  не надо писать как метод!!
