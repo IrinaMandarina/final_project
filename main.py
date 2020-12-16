@@ -1,9 +1,9 @@
 import pygame
 from pygame.draw import *
-import math
 import random
 import coins_module
 import platforms_module
+import module_gun_and_bullets
 
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
@@ -63,70 +63,6 @@ class Portals(pygame.sprite.Sprite):
         if self.timer_image_portal_temp > 12:
             self.timer_image_portal = 0
             self.timer_image_portal_temp = 0
-
-
-class Guns(pygame.sprite.Sprite):
-    def __init__(self, screen, owner,
-                 gun_type, image):  # тут под owner имееться в виду тот кто держит пушку нужен для координат если
-        # если будет несколько игроков надо указать игрока если конечно player.x даст координату игрока
-        pygame.sprite.Sprite.__init__(self)
-        self.screen = screen
-        self.owner = owner
-        self.gun_type = gun_type
-        self.image = image
-        self.sound_vistrel = pygame.mixer.Sound('vistrel.wav')
-
-    def draw(self):
-        if self.owner.m == -1:
-            surf = pygame.transform.flip(self.image, True, False)
-            surf.set_colorkey((255, 255, 255))
-            screen.blit(surf, (self.owner.x - 30, self.owner.y + 20))
-        else:
-            self.image.set_colorkey((255, 255, 255))
-            screen.blit(self.image, (self.owner.x + 30, self.owner.y + 20))
-
-    def vistrel(self):
-        self.sound_vistrel.play()
-        bullets.append(
-            Bullets(self.screen, self.owner.x + self.owner.m * 60, self.owner.y + 30, 20 * self.owner.m, 0,
-                    self.owner, self.gun_type, 0))
-
-
-class Bullets(pygame.sprite.Sprite):
-    def __init__(self, screen, x, y, vx, vy, owner, bullet_type, bullet_time_life):
-        # x,y,vx,vy-стандарнто,owner-тот кто выстрелил чтобы в конце пуля не убила стрелявшего
-        # bullet_type-тип пули(вдруг будут еще) bullet_time_life-просто таймер(мб время жизни пули должно пригодиться)
-        pygame.sprite.Sprite.__init__(self)
-        self.screen = screen
-        self.images = [pygame.transform.scale(pygame.image.load('bullet1.png'), (20, 20))]
-        self.x = x
-        self.y = y
-        self.vx = vx
-        self.vy = vy
-        self.owner = owner
-        self.bullet_type = bullet_type
-        self.bullet_time_life = bullet_time_life
-        self.rect = self.images[self.bullet_type].get_rect()
-
-    def move(self, platforms, bullet):
-        k = False  # исчезновение пули при взаимодействии с платформой
-        for platform in platforms:
-            if pygame.sprite.collide_rect(platform, bullet):
-                k = True
-        self.x += self.vx
-        self.y += self.vy
-        self.bullet_time_life -= 1
-        return k
-
-    def draw(self):  # тут ничего интересного просто отрисовка пули (поворот изображения и тп)
-        angle = math.atan2(-self.vy, self.vx)
-        image = pygame.transform.rotate(self.images[self.bullet_type], angle)
-        image = self.images[self.bullet_type]
-        image.set_colorkey((0, 0, 0))
-        image = pygame.transform.rotate(image, (angle / 3.14) * 180)
-        screen.blit(image, (self.x, self.y))
-        self.rect.center = (self.x, self.y)
-
 
 
 class Hero(pygame.sprite.Sprite):
@@ -310,7 +246,7 @@ def transpos(object):  # телепортация через портал объ
                             2] - 10  # вычитаем 10, чтобы было время на реагирование после телерортации
                     else:
                         object.x = end_portal.x + object.rect[2] + 10  # -||-
-                    if (start_portal.orientation != end_portal.orientation) and (type(object) == Bullets):
+                    if (start_portal.orientation != end_portal.orientation) and (type(object) == module_gun_and_bullets.Bullets):
                         object.vx = int((-1) * object.vx)
 
 
@@ -370,6 +306,7 @@ image_buttons_a = []
 image_buttons_b = []
 images = [[], [], []]
 coins = []  # список монеток
+
 images[0].append(pygame.transform.scale(pygame.image.load('1hero.png'), (80, 100)))
 images[0].append(pygame.transform.scale(pygame.image.load('2hero.png'), (80, 100)))
 images[0].append(pygame.transform.scale(pygame.image.load('3hero.png'), (80, 100)))
@@ -417,8 +354,8 @@ im_gun_3 = pygame.transform.scale(pygame.image.load('gun3.png'), (80, 45))
 game_over = pygame.mixer.Sound('game_over_kr.wav')
 click = pygame.mixer.Sound('click.wav')
 
-gun_a = Guns(screen, hero_a, 0, im_gun_2)  # инициализация ружья
-gun_b = Guns(screen, hero_b, 0, im_gun_1)
+gun_a = module_gun_and_bullets.Guns(screen, hero_a, 0, im_gun_2)  # инициализация ружья
+gun_b = module_gun_and_bullets.Guns(screen, hero_b, 0, im_gun_1)
 
 
 
@@ -474,9 +411,9 @@ while not finished:
         if play.click:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
-                    gun_a.vistrel()
+                    gun_a.vistrel(bullets)
                 if event.key == pygame.K_DOWN:
-                    gun_b.vistrel()
+                    gun_b.vistrel(bullets)
                 if event.key == pygame.K_LEFT:
                     hero_b.dx = -5
                     hero_b.m = (-1)

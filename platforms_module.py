@@ -1,8 +1,6 @@
 import pygame
 from pygame.draw import *
-import math
 import random
-import coins_module
 class Platform(pygame.sprite.Sprite):
 
     def __init__(self, screen, x, y, l):
