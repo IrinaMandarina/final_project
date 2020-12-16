@@ -2,7 +2,8 @@ import pygame
 from pygame.draw import *
 import math
 import random
-
+import coins_module
+import platforms_module
 
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
@@ -126,21 +127,20 @@ class Bullets(pygame.sprite.Sprite):
         self.rect.center = (self.x, self.y)
 
 
-class Coin(pygame.sprite.Sprite):
+"""class Coin(pygame.sprite.Sprite):
 
-    def __init__(self, screen, x, y,platform_host):
+    def __init__(self, screen, x, y, platform_host):
         pygame.sprite.Sprite.__init__(self)
         self.screen = screen
         self.x = x
         self.y = y
-        self.time_to_delete = random.randint(300,450)
-        self.platform_host=platform_host
-        self.rect=pygame.Rect((x,y,6,6))
-
+        self.time_to_delete = random.randint(300, 450)
+        self.platform_host = platform_host
+        self.rect = pygame.Rect((x, y, 6, 6))
 
     def draw(self):
         circle(self.screen, (250, 210, 1), (self.x, self.y), 12)
-        circle(self.screen, (255, 215, 0), (self.x, self.y), 10)
+        circle(self.screen, (255, 215, 0), (self.x, self.y), 10)"""
 
 
 class Hero(pygame.sprite.Sprite):
@@ -235,7 +235,7 @@ class Image_button:
             return False
 
 
-class Platform(pygame.sprite.Sprite):
+"""class Platform(pygame.sprite.Sprite):
 
     def __init__(self, screen, x, y, l):
         pygame.sprite.Sprite.__init__(self)
@@ -244,7 +244,7 @@ class Platform(pygame.sprite.Sprite):
         self.l = l
         self.screen = screen
         self.rect = pygame.Rect(self.x, self.y - 15, self.l, 30)
-        self.have_a_coin= False
+        self.have_a_coin = False
 
     def draw(self):
         rect(self.screen, (194, 120, 16), (self.x, self.y - 15, self.l, 30), border_bottom_left_radius=14,
@@ -256,7 +256,7 @@ class Platform(pygame.sprite.Sprite):
             k *= (-1)
         points.append((self.x + self.l, self.y))
         points.append((self.x + self.l, self.y - 15))
-        polygon(self.screen, (80, 180, 89), points)
+        polygon(self.screen, (80, 180, 89), points)"""
 
 
 def move(hero, platforms, k):
@@ -295,49 +295,50 @@ def move(hero, platforms, k):
     else:
         hero.x += hero.dx
     return k
-def generator_cn():
+
+
+"""def generator_cn():
     for i in platforms:
-        if random.randint(1,10000)>9990 and i.have_a_coin==False:
-            coins.append(Coin(screen,i.x+random.randint(12,i.l)-12,i.y-27,i))#ставит монетку на платформу в рандомном месте(из у вычитаеться 27 чтобы была не в платформе)
-            i.have_a_coin=True
-def drawing_and_removing_coins():
+        if random.randint(1, 10000) > 9990 and i.have_a_coin == False:
+            coins.append(Coin(screen, i.x + random.randint(12, i.l) - 12, i.y - 27,
+                              i))  # ставит монетку на платформу в рандомном месте(из у вычитаеться 27 чтобы была не в платформе)
+            i.have_a_coin = True"""
+
+
+"""def drawing_and_removing_coins():
     generator_cn()
     for i in coins:
         i.draw()
-        i.time_to_delete-=1
+        i.time_to_delete -= 1
     for p in range(len(coins)):
         for i in coins:
-            if i.time_to_delete<0:
-                i.platform_host.have_a_coin=False
+            if i.time_to_delete < 0:
+                i.platform_host.have_a_coin = False
                 coins.remove(i)
                 break
     for p in range(len(coins)):
-        for temp_hero in [hero_a,hero_b]:
+        for temp_hero in [hero_a, hero_b]:
             for i in coins:
                 if i.rect.colliderect(temp_hero.rect):
-                    temp_hero.score+=1
+                    temp_hero.score += 1
                     i.platform_host.have_a_coin = False
                     coins.remove(i)
-                    break
+                    break"""
 
 
-
-
-
-
-def generator_pl():
+"""def generator_pl():
     level = (670, 520, 370, 220)  # уровни на которых нужно сделать платформы
     jump_distance = 150  # длинна прыжка
     min_length = 200  # минимальная длина платформы
     max_length = 400  # максимальная длина платформы
     for i in level:
         x_nachala = 0
-        while x_nachala < width +5 :  # проверка на не выход за экран
+        while x_nachala < width + 5:  # проверка на не выход за экран
             length = random.randint(min_length, max_length)
-            if width< x_nachala+length:
-                length=width-x_nachala
+            if width < x_nachala + length:
+                length = width - x_nachala
             platforms.append(Platform(screen, x_nachala, i, length))
-            x_nachala += (length + jump_distance)
+            x_nachala += (length + jump_distance)"""
 
 
 def zastavka(music):
@@ -441,11 +442,11 @@ k_b = False
 platforms = []  # список платформ
 portals = []  # список порталов
 bullets = []  # список пуль
-coin = [] #список монеток
+coin = []  # список монеток
 image_buttons_a = []
 image_buttons_b = []
 images = [[], [], []]
-coins=[] #список монеток
+coins = []  # список монеток
 images[0].append(pygame.transform.scale(pygame.image.load('1hero.png'), (80, 100)))
 images[0].append(pygame.transform.scale(pygame.image.load('2hero.png'), (80, 100)))
 images[0].append(pygame.transform.scale(pygame.image.load('3hero.png'), (80, 100)))
@@ -474,15 +475,15 @@ image_buttons_b.append(Image_button(screen, 630, 80, images[1], 'Elf'))
 image_buttons_a.append(Image_button(screen, 230, 80, images[2], 'Fairy'))
 image_buttons_b.append(Image_button(screen, 730, 80, images[2], 'Fairy'))
 
-generator_pl()  # генерация платформ(важно чтобы было до инициализации игроков)
+platforms_module.generator_pl(screen,width,platforms)  # генерация платформ(важно чтобы было до инициализации игроков)
 
-x_hero=platforms[0].x+int((platforms[0].l)*0.5)
-y_hero=platforms[0].y-120
+x_hero = platforms[0].x + int((platforms[0].l) * 0.5)
+y_hero = platforms[0].y - 120
 hero_a = Hero(screen, x_hero, y_hero)  # инициализация игрока A (справа)
 hero_a.images = images[0]
-nomer_platform=len(platforms)-1
-x_hero=platforms[nomer_platform].x+int((platforms[nomer_platform].l)*0.5)
-y_hero=platforms[nomer_platform].y-120
+nomer_platform = len(platforms) - 1
+x_hero = platforms[nomer_platform].x + int((platforms[nomer_platform].l) * 0.5)
+y_hero = platforms[nomer_platform].y - 120
 hero_b = Hero(screen, x_hero, y_hero)  # инициализация игрока В (слева)
 hero_b.images = images[0]
 
@@ -497,7 +498,7 @@ click = pygame.mixer.Sound('click.wav')
 gun_a = Guns(screen, hero_a, 0, im_gun_2)  # инициализация ружья
 gun_b = Guns(screen, hero_b, 0, im_gun_1)
 
-generator_cn()
+
 
 while not finished:
     clock.tick(FPS)
@@ -592,7 +593,7 @@ while not finished:
             hero_b.x = 950
             hero_a.y = 35
             platforms = []
-            generator_pl()
+            platforms_module.generator_pl(screen,width,platforms)
             restart.click = False
             music = False
         if hero_a.health > 0 and hero_b.health > 0:
@@ -637,7 +638,7 @@ while not finished:
             hero_b.draw()
             gun_b.draw()
 
-            drawing_and_removing_coins()#это больше чем просто отрисовка !!  не надо писать как метод!!!
+            coins_module.drawing_and_removing_coins(screen,platforms,coins,[hero_a,hero_b])  # это больше чем просто отрисовка !!  не надо писать как метод!!!
             f = pygame.font.Font(None, 36)
             text = f.render('Hp A   ' + str(hero_a.health), True, (180, 0, 0))
             #  text = f.render('Your game time (sec):' + str(round(timer / FPS, 1)), 1, (180, 0, 0))
