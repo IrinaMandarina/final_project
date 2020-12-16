@@ -14,10 +14,11 @@ class Coin(pygame.sprite.Sprite):
         self.platform_host = platform_host
         self.rect = pygame.Rect((x, y, 6, 6))
         self.sound = sound
+        self.image=pygame.transform.scale(pygame.image.load('coin.png'), (20, 20))
 
     def draw(self):
-        circle(self.screen, (250, 210, 1), (self.x, self.y), 12)
-        circle(self.screen, (255, 215, 0), (self.x, self.y), 10)
+        self.image.set_colorkey((255, 255, 255))
+        self.screen.blit(self.image, (self.x, self.y-10))
 
 
 def generator_cn(screen, platforms, coins, timer_monetok, coin):
@@ -30,7 +31,7 @@ def generator_cn(screen, platforms, coins, timer_monetok, coin):
     return timer_monetok
 
 
-def drawing_and_removing_coins(coins, hero_list, coin):
+def drawing_and_removing_coins(coins, hero_list, coin_sound):
     for i in coins:
         i.draw()
         i.time_to_delete -= 1
@@ -44,7 +45,7 @@ def drawing_and_removing_coins(coins, hero_list, coin):
         for temp_hero in hero_list:
             for i in coins:
                 if i.rect.colliderect(temp_hero.rect):
-                    coin.play()
+                    coin_sound.play()
                     temp_hero.score += 1
                     i.platform_host.have_a_coin = False
                     coins.remove(i)

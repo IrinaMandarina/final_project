@@ -37,3 +37,8 @@ def generator_pl(screen,width,platforms):
                 length = width - x_nachala
             platforms.append(Platform(screen, x_nachala, i, length))
             x_nachala += (length + jump_distance)
+    for p in range(len(platforms)-1):
+        for k in platforms:
+            if k.l<80:
+                platforms.remove(k)
+                break
