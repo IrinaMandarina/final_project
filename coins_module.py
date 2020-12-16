@@ -19,7 +19,6 @@ class Coin(pygame.sprite.Sprite):
 
 def generator_cn(screen,platforms,coins,timer_monetok):
     i=platforms[random.randint(1,len(platforms))-1]
-    print(timer_monetok)
     if (timer_monetok<0) and i.have_a_coin == False:
         coins.append(Coin(screen, i.x + random.randint(12, i.l) - 12, i.y - 27,i))  # ставит монетку на платформу в рандомном месте(из у вычитаеться 27 чтобы была не в платформе)
         i.have_a_coin = True

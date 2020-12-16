@@ -282,7 +282,7 @@ hero_b.images = images[0]
 im_gun_1 = pygame.transform.scale(pygame.image.load('gun1.png'), (80, 45))
 im_gun_2 = pygame.transform.scale(pygame.image.load('gun4.png'), (80, 45))
 im_gun_3 = pygame.transform.scale(pygame.image.load('gun3.png'), (80, 45))
-portals_module.generator_pr(platforms,portals,screen)
+portals_module.generator_pr(platforms,portals,screen,width)
 
 game_over = pygame.mixer.Sound('game_over_kr.wav')
 click = pygame.mixer.Sound('click.wav')
@@ -378,7 +378,10 @@ while not finished:
             timer = 0
             coins=[]
             platforms = []
+            bullets = []
+            portals = []
             platforms_module.generator_pl(screen, width, platforms)
+            portals_module.generator_pr(platforms,portals,screen,width)
             hero_a.score = 0
             hero_b.score = 0
             hero_a.health = 100
@@ -432,7 +435,6 @@ while not finished:
             gun_b.draw()
 
             timer_monetok =coins_module.generator_cn(screen,platforms,coins,timer_monetok) - 1
-            print('timermonetok',timer_monetok)
             coins_module.drawing_and_removing_coins(coins,[hero_a,hero_b])  # это больше чем просто отрисовка !!  не надо писать как метод!!
             f = pygame.font.Font(None, 36)
             text = f.render('Hp A   ' + str(hero_a.health), True, (180, 0, 0))

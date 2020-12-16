@@ -70,22 +70,20 @@ def transpos(object,portals):  # телепортация через порта�
                     if end_portal.orientation:
                         object.x = end_portal.x - object.rect[
                             2] -20  # вычитаем 10, чтобы было время на реагирование после телерортации
-                        print('-')
                     else:
                         object.x = end_portal.x + object.rect[2] +80  # -||-
-                        print('+')
                     if type(object)==module_gun_and_bullets.Bullets:
                         object.vx=int((object.vx**2)**0.5)*temp_k
-def generator_pr(platforms,portals,screen):
+def generator_pr(platforms,portals,screen,width):
     for i in range(0,random.randint(0,2)):
         p=random.randint(0,len(platforms)-1)
-        while platforms[p].have_a_portal==True:
+        while platforms[p].have_a_portal==True or (platforms[p].x+platforms[p].l+10)>width:
             p=random.randint(0,len(platforms)-1)
         portals.append(Portals(screen,platforms[p].x+platforms[p].l/2,platforms[p].y-120,True,i))
         platforms[p].have_a_portal=True
         p = random.randint(0, len(platforms) - 1)
 
-        while platforms[p].have_a_portal == True:
+        while platforms[p].have_a_portal == True or (platforms[p].x+platforms[p].l+10)>width:
             p = random.randint(0, len(platforms) - 1)
         portals.append(Portals(screen, platforms[p].x + platforms[p].l/2, platforms[p].y-120, False, i))
         platforms[p].have_a_portal = True
